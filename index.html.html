@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catéchuménat — St Pierre de Niangon Sud</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-database-compat.js"></script>
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dark: #8B6914;
+  --crimson: #8B1A1A;
+  --crimson-light: #B22222;
+  --navy: #0D1B3E;
+  --navy-mid: #1a2d5a;
+  --cream: #FDF8F0;
+  --cream-dark: #F0E8D5;
+  --white: #FFFFFF;
+  --text-dark: #1a1a2e;
+  --text-mid: #3d3d5c;
+  --text-light: #7a7a99;
+  --green: #1a6b3c;
+  --green-light: #27ae60;
+  --shadow: 0 8px 32px rgba(0,0,0,0.18);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.10);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--navy);
+  min-height: 100vh;
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 50%, #0a2744 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+#loginScreen::before {
+  content: '✝';
+  position: absolute;
+  font-size: 600px;
+  color: rgba(201,168,76,0.04);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  font-family: serif;
+}
+
+.cross-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139,26,26,0.12) 0%, transparent 50%);
+}
+
+.login-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: 24px;
+  padding: 48px 44px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, var(--crimson) 0%, var(--navy) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 20px rgba(139,26,26,0.4);
+  font-size: 40px;
+}
+
+.login-title {
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.3;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.diocese-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--crimson), var(--crimson-light));
+  color: white;
+  font-size: 11px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-top: 8px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.5px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0d9cc;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: 'Lato', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  transition: all 0.2s;
+  appearance: none;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+
+select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--crimson) 0%, var(--navy) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 8px;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139,26,26,0.4);
+}
+
+.login-error {
+  background: #fff0f0;
+  border: 1px solid #ffcccc;
+  color: var(--crimson);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 12px;
+  display: none;
+  text-align: center;
+}
+
+/* ===== MAIN APP ===== */
+#app { display: none; min-height: 100vh; }
+
+/* TOP HEADER */
+.app-header {
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-mid) 60%, var(--crimson) 100%);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon { font-size: 28px; }
+
+.header-text h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1.1;
+}
+
+.header-text p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  font-style: italic;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-badge {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.user-role {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+}
+
+.btn-logout {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+/* SECTION TABS */
+.section-tabs {
+  background: var(--navy-mid);
+  display: flex;
+  border-bottom: 2px solid rgba(201,168,76,0.3);
+  overflow-x: auto;
+}
+
+.section-tab {
+  padding: 14px 28px;
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.section-tab.active {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold);
+  background: rgba(201,168,76,0.08);
+}
+
+.section-tab:hover:not(.active) {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.05);
+}
+
+/* CONTENT */
+.app-content {
+  background: #f4f0e8;
+  min-height: calc(100vh - 64px - 52px);
+  padding: 24px;
+}
+
+/* INNER TABS */
+.inner-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  background: white;
+  padding: 6px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.inner-tab {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  color: var(--text-mid);
+  font-family: 'Lato', sans-serif;
+}
+
+.inner-tab.active {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.inner-tab:hover:not(.active) { background: var(--cream-dark); }
+
+/* CARDS */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(201,168,76,0.15);
+}
+
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--cream-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, var(--gold), var(--crimson));
+  border-radius: 2px;
+}
+
+/* DASHBOARD */
+.dashboard-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 50%, var(--crimson) 100%);
+  border-radius: var(--radius);
+  padding: 28px;
+  color: white;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-header::after {
+  content: '✝';
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 100px;
+  color: rgba(255,255,255,0.05);
+  font-family: serif;
+}
+
+.dashboard-aumoner {
+  font-size: 13px;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+  font-family: 'Cinzel', serif;
+}
+
+.dashboard-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+}
+
+.dashboard-section-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  border-top: 4px solid var(--gold);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover { transform: translateY(-3px); }
+
+.stat-number {
+  font-family: 'Cinzel', serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--navy);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-light);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* FORM GRID */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.form-grid .form-group { margin-bottom: 0; }
+
+/* BUTTONS */
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  font-family: 'Lato', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: white;
+}
+
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(13,27,62,0.4); transform: translateY(-1px); }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: white;
+}
+
+.btn-gold:hover { box-shadow: 0 4px 16px rgba(139,105,20,0.4); }
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--crimson), #c0392b);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white;
+}
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold-dark);
+}
+
+/* TABLE */
+.table-responsive { overflow-x: auto; border-radius: var(--radius-sm); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  color: white;
+  padding: 12px 14px;
+  text-align: left;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+th:first-child { border-radius: 8px 0 0 0; }
+th:last-child { border-radius: 0 8px 0 0; }
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0eada;
+  color: var(--text-dark);
+}
+
+tr:hover td { background: #faf7f0; }
+tr:nth-child(even) td { background: #fdfaf4; }
+tr:nth-child(even):hover td { background: #f8f4ea; }
+
+/* PRESENCE BADGES */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge-P { background: #d4edda; color: #155724; }
+.badge-A { background: #f8d7da; color: #721c24; }
+.badge-E { background: #fff3cd; color: #856404; }
+
+/* PRESENCE INPUT */
+.presence-select {
+  width: 60px;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* NOTES INPUT */
+.note-input {
+  width: 65px;
+  padding: 5px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ADMIN SECTION */
+.admin-users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.user-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--cream-dark);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-card-info h4 {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+.user-card-info p { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+
+/* TABS CONTENT */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ANIMATEURS TABLE */
+.animateur-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.animateur-tag {
+  background: linear-gradient(90deg, var(--navy), var(--navy-mid));
+  color: white;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* INSCRIPTION FORM */
+.inscription-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* MOYENNE DISPLAY */
+.moyenne-good { color: var(--green); font-weight: 700; }
+.moyenne-mid { color: #e67e22; font-weight: 700; }
+.moyenne-bad { color: var(--crimson); font-weight: 700; }
+
+/* ALERT */
+.alert {
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: white;
+  border-radius: 18px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .app-content { padding: 12px; }
+  .header-text h1 { font-size: 12px; }
+  .user-badge { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .login-card { padding: 28px 20px; }
+  .section-tab { padding: 12px 16px; font-size: 12px; }
+}
+
+/* GOLD SEPARATOR */
+.gold-sep {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 24px 0;
+  border-radius: 2px;
+}
+
+/* EXPORT ZONE */
+.export-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: var(--cream);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cream-dark);
+}
+
+.export-bar label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* ANIMATING */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tab-content.active { animation: fadeSlideIn 0.25s ease; }
+
+/* SCROLL */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* MESSE COLUMN */
+th.messe-th { background: linear-gradient(135deg, var(--crimson), #a93226); }
+th.cours-th { background: linear-gradient(135deg, var(--green), #1e8449); }
+th.note-th { background: linear-gradient(135deg, #6c3483, #9b59b6); }
+
+/* Legend */
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+/* FILE UPLOAD */
+.upload-zone {
+  border: 2px dashed var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--cream);
+}
+
+.upload-zone:hover { background: #f0e8d0; border-color: var(--gold-dark); }
+.upload-zone input { display: none; }
+
+.section-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+.badge-enfants { background: #d1e8ff; color: #0a4a8a; }
+.badge-jeunes { background: #d4edda; color: #155724; }
+.badge-adultes { background: #ffe0b2; color: #7b3800; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+  <div class="cross-bg"></div>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">✝</div>
+      <div class="login-title">Catéchuménat<br>St Pierre de Niangon Sud</div>
+      <div class="login-subtitle">Paroisse St Pierre de Niangon Sud à Gauche</div>
+      <div class="diocese-badge">✦ Diocèse de Yopougon ✦</div>
+    </div>
+
+    <div class="form-group">
+      <label>Section</label>
+      <select id="loginSection" class="form-control">
+        <option value="">— Choisir la section —</option>
+        <option value="enfants">👦 Enfants</option>
+        <option value="jeunes">🧑 Jeunes</option>
+        <option value="adultes">👨 Adultes</option>
+        <option value="admin">🔐 Administration</option>
+      </select>
+    </div>
+
+    <div id="loginLevelGroup" class="form-group" style="display:none;">
+      <label>Niveau (Animateurs)</label>
+      <select id="loginLevel" class="form-control">
+        <option value="">— Tous les niveaux —</option>
+        <option value="1">1ère Année</option>
+        <option value="2">2ème Année</option>
+        <option value="3">3ème Année</option>
+        <option value="4">4ème Année</option>
+        <option value="5">5ème Année</option>
+      </select>
+    </div>
+
+    <div id="loginTitreGroup" class="form-group" style="display:none;">
+      <label>Titre / Rôle</label>
+      <select id="loginTitre" class="form-control">
+        <option value="">— Choisir un rôle —</option>
+        <option value="president">👑 Président(e)</option>
+        <option value="bureau">📋 Membre du Bureau</option>
+        <option value="animateur">📚 Animateur / Animatrice</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Login</label>
+      <input type="text" id="loginUser" class="form-control" placeholder="Identifiant…">
+    </div>
+
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="loginPass" class="form-control" placeholder="••••••••">
+    </div>
+
+    <button class="btn-login" onclick="doLogin()">✝ Se Connecter</button>
+    <div class="login-error" id="loginError">Identifiants incorrects. Veuillez réessayer.</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-icon">✝</div>
+      <div class="header-text">
+        <h1>St Pierre de Niangon Sud</h1>
+        <p>Diocèse de Yopougon — Catéchuménat</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-badge">
+        <span class="user-name" id="headerUserName">—</span>
+        <span class="user-role" id="headerUserRole">—</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">⏻ Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- SECTION TABS -->
+  <div class="section-tabs" id="sectionTabs">
+    <div class="section-tab" data-sec="enfants" onclick="showSection('enfants')">👦 Enfants</div>
+    <div class="section-tab" data-sec="jeunes" onclick="showSection('jeunes')">🧑 Jeunes</div>
+    <div class="section-tab" data-sec="adultes" onclick="showSection('adultes')">👨 Adultes</div>
+    <div class="section-tab" data-sec="admin" id="adminTab" onclick="showSection('admin')" style="display:none;">🔐 Administration</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="app-content" id="appContent"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-title" id="modalTitle">Titre</div>
+    <div id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+
+<script>
+// ============================================================
+// FIREBASE + CACHE LOCAL
+// ============================================================
+const LS_KEY = 'catechumenes_stpierre_cache';
+const FIREBASE_ROOT = 'catechumenat_st_pierre';
+const firebaseConfig = {
+  apiKey: "AIzaSyAyK4TdyZpeAk9_ie7pOEQHADs2avLsFNE",
+  authDomain: "index-8e3ec.firebaseapp.com",
+  databaseURL: "https://index-8e3ec-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "index-8e3ec",
+  storageBucket: "index-8e3ec.firebasestorage.app",
+  messagingSenderId: "369185608186",
+  appId: "1:369185608186:web:bcf3cc150f380056bd1443"
+};
+
+function lsLoad() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    console.error('Cache local illisible :', e);
+    return null;
+  }
+}
+
+function lsSave(data) {
+  try {
+    if (data === null) {
+      localStorage.removeItem(LS_KEY);
+      return;
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.error('Erreur de cache local :', e);
+  }
+}
+
+// ============================================================
+// DATA STORE
+// ============================================================
+const DB = {
+  aumonier: "Abbé Jean-Baptiste KONAN",
+  users: [],
+  sections: {
+    enfants: { label:'Enfants', icon:'👦', color:'#0D1B3E', badge:'badge-enfants' },
+    jeunes:  { label:'Jeunes',  icon:'🧑', color:'#1a6b3c', badge:'badge-jeunes' },
+    adultes: { label:'Adultes', icon:'👨', color:'#7b3800', badge:'badge-adultes' }
+  },
+  niveaux: ['1ère Année','2ème Année','3ème Année','4ème Année','5ème Année'],
+  animateurs: { enfants:{}, jeunes:{}, adultes:{} },
+  catechumenes: { enfants:[], jeunes:[], adultes:[] },
+  presences: {},
+  notes: {}
+};
+
+function resetAnimateursShape() {
+  ['enfants','jeunes','adultes'].forEach(sec => {
+    if (!DB.animateurs[sec]) DB.animateurs[sec] = {};
+    for (let n=1; n<=5; n++) {
+      if (!Array.isArray(DB.animateurs[sec][n])) DB.animateurs[sec][n] = [];
+    }
+  });
+}
+resetAnimateursShape();
+
+let currentUser = null;
+let currentSection = null;
+let firebaseReady = false;
+let firebaseDb = null;
+let firebaseRootRef = null;
+let realtimeBound = false;
+let lastSerializedState = '';
+
+function createDefaultAdmin() {
+  return {
+    id: 'admin',
+    login: 'admin',
+    pass: 'Admin@2024',
+    section: 'admin',
+    titre: 'admin',
+    niveau: '',
+    nom: 'Administrateur'
+  };
+}
+
+function ensureDefaultAdmin() {
+  if (!Array.isArray(DB.users)) DB.users = [];
+  if (!DB.users.some(u => u && u.id === 'admin')) {
+    DB.users.unshift(createDefaultAdmin());
+  }
+}
+
+function getSerializableState() {
+  return {
+    aumonier: DB.aumonier,
+    users: Array.isArray(DB.users) ? DB.users : [],
+    catechumenes: DB.catechumenes || { enfants:[], jeunes:[], adultes:[] },
+    animateurs: DB.animateurs || { enfants:{}, jeunes:{}, adultes:{} },
+    presences: DB.presences || {},
+    notes: DB.notes || {}
+  };
+}
+
+function applyState(saved) {
+  const data = saved || {};
+  DB.aumonier = data.aumonier || "Abbé Jean-Baptiste KONAN";
+  DB.users = Array.isArray(data.users) ? data.users : [];
+  DB.catechumenes = {
+    enfants: Array.isArray(data.catechumenes?.enfants) ? data.catechumenes.enfants : [],
+    jeunes: Array.isArray(data.catechumenes?.jeunes) ? data.catechumenes.jeunes : [],
+    adultes: Array.isArray(data.catechumenes?.adultes) ? data.catechumenes.adultes : []
+  };
+  DB.animateurs = {
+    enfants: data.animateurs?.enfants || {},
+    jeunes: data.animateurs?.jeunes || {},
+    adultes: data.animateurs?.adultes || {}
+  };
+  DB.presences = data.presences || {};
+  DB.notes = data.notes || {};
+  resetAnimateursShape();
+  ensureDefaultAdmin();
+  lastSerializedState = JSON.stringify(getSerializableState());
+}
+
+function refreshCurrentView() {
+  if (!currentUser) return;
+  if (document.getElementById('app').style.display !== 'block') return;
+  const container = document.getElementById('appContent');
+  if (!container) return;
+
+  if (currentSection === 'admin') {
+    renderAdmin(container);
+    return;
+  }
+
+  const activeInner = document.querySelector('.inner-tab.active');
+  const activeTabId = activeInner ? activeInner.id.replace('itab-', '') : 'dashboard';
+  showSection(currentSection || currentUser.section);
+  if (activeTabId && activeTabId !== 'dashboard') showInnerTab(activeTabId);
+}
+
+function initFirebase() {
+  if (firebaseReady) return true;
+  if (!window.firebase) throw new Error('SDK Firebase non chargé.');
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  firebaseDb = firebase.database();
+  firebaseRootRef = firebaseDb.ref(FIREBASE_ROOT);
+  firebaseReady = true;
+  return true;
+}
+
+function bindRealtimeSync() {
+  if (!firebaseReady || realtimeBound) return;
+  firebaseRootRef.on('value', (snapshot) => {
+    const remote = snapshot.val();
+    if (!remote) return;
+    const remoteState = {
+      aumonier: remote.aumonier,
+      users: remote.users,
+      catechumenes: remote.catechumenes,
+      animateurs: remote.animateurs,
+      presences: remote.presences,
+      notes: remote.notes
+    };
+    const serializedRemote = JSON.stringify(remoteState || {});
+    if (serializedRemote === lastSerializedState) return;
+    applyState(remoteState);
+    lsSave(getSerializableState());
+    if (currentUser) refreshCurrentView();
+  }, (error) => {
+    console.error('Erreur de synchronisation Firebase :', error);
+  });
+  realtimeBound = true;
+}
+
+function persistAll() {
+  const payload = getSerializableState();
+  lastSerializedState = JSON.stringify(payload);
+  lsSave(payload);
+
+  if (!firebaseReady || !firebaseRootRef) {
+    return Promise.resolve(payload);
+  }
+
+  return firebaseRootRef
+    .set({
+      ...payload,
+      meta: {
+        updatedAt: new Date().toISOString(),
+        updatedBy: currentUser?.login || 'system'
+      }
+    })
+    .catch((error) => {
+      console.error('Erreur de sauvegarde Firebase :', error);
+      showAlert('⚠️ Sauvegarde en ligne impossible. Les données restent en cache sur cet appareil.');
+      throw error;
+    });
+}
+
+function normalizePath(path='') {
+  return String(path || '').replace(/^\/+|\/+$/g, '');
+}
+
+async function fbSet(path, data) {
+  initFirebase();
+  const cleanPath = normalizePath(path);
+  if (!cleanPath) {
+    applyState(data || {});
+    await persistAll();
+    return;
+  }
+  await firebaseRootRef.child(cleanPath).set(data);
+}
+
+async function fbGet(path) {
+  initFirebase();
+  const cleanPath = normalizePath(path);
+  const snapshot = cleanPath
+    ? await firebaseRootRef.child(cleanPath).once('value')
+    : await firebaseRootRef.once('value');
+  return snapshot.val();
+}
+
+async function fbDel(path) {
+  initFirebase();
+  const cleanPath = normalizePath(path);
+  if (!cleanPath) {
+    await firebaseRootRef.remove();
+    return;
+  }
+  await firebaseRootRef.child(cleanPath).remove();
+}
+
+async function initFromFirebase() {
+  showLoadingOverlay(true, 'Connexion à Firebase…');
+  try {
+    initFirebase();
+    const snapshot = await firebaseRootRef.once('value');
+    const remote = snapshot.val();
+
+    if (remote) {
+      applyState(remote);
+      lsSave(getSerializableState());
+    } else {
+      const cached = lsLoad();
+      if (cached) {
+        applyState(cached);
+      } else {
+        applyState({ users: [createDefaultAdmin()] });
+      }
+      await persistAll();
+    }
+
+    bindRealtimeSync();
+  } catch (error) {
+    console.error('Initialisation Firebase échouée :', error);
+    const cached = lsLoad();
+    if (cached) {
+      applyState(cached);
+      showAlert('⚠️ Firebase indisponible. L’application fonctionne avec le cache local.');
+    } else {
+      applyState({ users: [createDefaultAdmin()] });
+      showAlert('⚠️ Firebase indisponible. Compte admin local chargé temporairement.');
+    }
+  } finally {
+    showLoadingOverlay(false);
+  }
+}
+
+async function loadAllFromFirebase() {
+  showLoadingOverlay(true, 'Rechargement depuis Firebase…');
+  try {
+    initFirebase();
+    const snapshot = await firebaseRootRef.once('value');
+    const remote = snapshot.val();
+    if (remote) {
+      applyState(remote);
+      lsSave(getSerializableState());
+      refreshCurrentView();
+      showAlert('✅ Données rechargées depuis Firebase !');
+    } else {
+      showAlert('ℹ️ Aucune donnée distante trouvée sur Firebase.');
+    }
+  } catch (error) {
+    console.error('Rechargement Firebase échoué :', error);
+    showAlert('⚠️ Impossible de recharger depuis Firebase.');
+  } finally {
+    showLoadingOverlay(false);
+    showSaveIndicator();
+  }
+}
+
+async function saveConfig() {
+  try {
+    await persistAll();
+    showSaveIndicator();
+    showAlert('✅ Configuration synchronisée avec Firebase.');
+  } catch (error) {
+    console.error('saveConfig error:', error);
+  }
+}
+
+// Debounce sauvegarde présences/notes
+let _presTimer = null;
+function savePresencesDebounced() {
+  clearTimeout(_presTimer);
+  _presTimer = setTimeout(() => {
+    persistAll().finally(() => showSaveIndicator());
+  }, 800);
+}
+
+let _notesTimer = null;
+function saveNotesDebounced() {
+  clearTimeout(_notesTimer);
+  _notesTimer = setTimeout(() => {
+    persistAll().finally(() => showSaveIndicator());
+  }, 800);
+}
+
+// ============================================================
+// HASH MOT DE PASSE (SHA-256 via Web Crypto API)
+// ============================================================
+async function hashPass(pass) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pass + 'stpierre_niangon_salt');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verifyPass(pass, hash) {
+  const h = await hashPass(pass);
+  return h === hash;
+}
+
+// ============================================================
+// OVERLAY CHARGEMENT
+// ============================================================
+function showLoadingOverlay(show, msg='Chargement…') {
+  let ov = document.getElementById('loadingOverlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'loadingOverlay';
+    ov.style.cssText = `position:fixed;inset:0;background:rgba(13,27,62,0.92);z-index:99999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;`;
+    ov.innerHTML = `<div style="font-size:48px;margin-bottom:16px;">✝</div>
+      <div id="loadingMsg" style="font-family:'Cinzel',serif;font-size:16px;color:#E8C97A;">${msg}</div>
+      <div style="margin-top:16px;width:48px;height:48px;border:4px solid rgba(255,255,255,0.2);
+        border-top-color:#C9A84C;border-radius:50%;animation:spin 1s linear infinite;"></div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+    document.body.appendChild(ov);
+  }
+  ov.style.display = show ? 'flex' : 'none';
+  if (show && document.getElementById('loadingMsg'))
+    document.getElementById('loadingMsg').textContent = msg;
+}
+
+// ============================================================
+// INDICATEUR SAUVEGARDE
+// ============================================================
+function showSaveIndicator() {
+  let ind = document.getElementById('saveInd');
+  if (!ind) {
+    ind = document.createElement('div');
+    ind.id = 'saveInd';
+    ind.style.cssText = 'position:fixed;bottom:16px;right:16px;background:#1a6b3c;color:white;' +
+      'padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;' +
+      'opacity:0;transition:opacity 0.4s;pointer-events:none;';
+    document.body.appendChild(ind);
+  }
+  ind.textContent = '💾 Sauvegardé';
+  ind.style.opacity = '1';
+  setTimeout(() => ind.style.opacity = '0', 2500);
+}
+
+function saveAndNotify() { persistAll().finally(() => showSaveIndicator()); }
+function saveToStorage() { persistAll().finally(() => showSaveIndicator()); }
+
+async function clearStorage() {
+  if(!confirm('⚠️ Réinitialiser toutes les données ?\nCette action est IRRÉVERSIBLE !')) return;
+  lsSave(null);
+  try {
+    if (firebaseReady && firebaseRootRef) await firebaseRootRef.remove();
+  } catch(e) { console.error('Erreur reset Firebase:', e); }
+  location.reload();
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+document.getElementById('loginSection').addEventListener('change', function(){
+  const sec = this.value;
+  document.getElementById('loginTitreGroup').style.display = (sec && sec!=='admin') ? 'block' : 'none';
+  document.getElementById('loginLevelGroup').style.display = 'none';
+});
+
+document.getElementById('loginTitre').addEventListener('change', function(){
+  document.getElementById('loginLevelGroup').style.display = (this.value==='animateur') ? 'block' : 'none';
+});
+
+async function doLogin() {
+  const section = document.getElementById('loginSection').value;
+  const titre   = document.getElementById('loginTitre').value || 'admin';
+  const niveau  = document.getElementById('loginLevel').value;
+  const login   = document.getElementById('loginUser').value.trim();
+  const pass    = document.getElementById('loginPass').value;
+
+  if (!section || !login || !pass) {
+    document.getElementById('loginError').textContent = 'Veuillez remplir tous les champs.';
+    document.getElementById('loginError').style.display = 'block';
+    return;
+  }
+
+  const btn = document.querySelector('.btn-login');
+  btn.textContent = '⏳ Vérification…';
+  btn.disabled = true;
+  document.getElementById('loginError').style.display = 'none';
+
+  try {
+    let found = null;
+    for (const u of DB.users) {
+      if (u.login !== login) continue;
+      const sectionOk = (u.section === 'admin') || (u.section === section);
+      if (!sectionOk) continue;
+
+      // Vérifier le mot de passe : texte brut OU hashé SHA-256
+      let ok = false;
+      if (u.pass && u.pass.length === 64 && /^[0-9a-f]+$/.test(u.pass)) {
+        ok = await verifyPass(pass, u.pass);
+      } else {
+        ok = (u.pass === pass);
+      }
+      if (ok) { found = u; break; }
+    }
+
+    if (found) {
+      currentUser = {
+        ...found,
+        nom: found.nom || found.login,
+        niveau: niveau || found.niveau || ''
+      };
+      document.getElementById('loginError').style.display = 'none';
+      launchApp();
+    } else {
+      document.getElementById('loginError').textContent = 'Login ou mot de passe incorrect.';
+      document.getElementById('loginError').style.display = 'block';
+    }
+  } catch(e) {
+    console.error('Erreur login:', e);
+    document.getElementById('loginError').textContent = '⚠️ Erreur : ' + (e.message || 'problème inattendu.');
+    document.getElementById('loginError').style.display = 'block';
+  }
+
+  btn.textContent = '✝ Se Connecter';
+  btn.disabled = false;
+}
+
+function launchApp() {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+
+  document.getElementById('headerUserName').textContent = currentUser.nom;
+  const rolesLabel = {president:'Président(e)',bureau:'Membre du Bureau',animateur:'Animateur',admin:'Administrateur'};
+  let role = rolesLabel[currentUser.titre]||currentUser.titre;
+  if(currentUser.niveau) role += ' — ' + DB.niveaux[parseInt(currentUser.niveau)-1];
+  document.getElementById('headerUserRole').textContent = role + (currentUser.section!=='admin' ? ' | '+currentUser.section : '');
+
+  if(currentUser.section==='admin') {
+    document.getElementById('adminTab').style.display='flex';
+    document.querySelectorAll('.section-tab[data-sec]').forEach(t=> t.style.display='flex');
+    showSection('admin');
+  } else {
+    document.getElementById('adminTab').style.display='none';
+    document.querySelectorAll('.section-tab[data-sec]').forEach(t=>{
+      t.style.display = (t.dataset.sec===currentUser.section)?'flex':'none';
+    });
+    showSection(currentUser.section);
+  }
+}
+
+function doLogout() {
+  currentUser=null; currentSection=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginSection').value='';
+  document.getElementById('loginTitreGroup').style.display='none';
+  document.getElementById('loginLevelGroup').style.display='none';
+}
+
+// ============================================================
+// SECTION RENDER
+// ============================================================
+function showSection(sec) {
+  currentSection = sec;
+  document.querySelectorAll('.section-tab').forEach(t=>t.classList.toggle('active', t.dataset.sec===sec));
+  const content = document.getElementById('appContent');
+
+  if(sec==='admin') { renderAdmin(content); return; }
+
+  const isPrivileged = (currentUser.titre==='president'||currentUser.titre==='bureau'||currentUser.titre==='admin');
+
+  let tabs = [];
+  tabs.push({id:'dashboard', label:'📊 Tableau de Bord'});
+  if(isPrivileged) {
+    tabs.push({id:'inscription', label:'📝 Inscription (1ère Année)'});
+    tabs.push({id:'reinscription', label:'🔄 Réinscription (2e-5e Année)'});
+  }
+  tabs.push({id:'gestion', label:'📋 Gestion & Présences'});
+  tabs.push({id:'notes', label:'🎓 Notes & Moyennes'});
+  tabs.push({id:'animateurs', label:'👥 Animateurs & Niveaux'});
+
+  content.innerHTML = `
+    <div class="inner-tabs" id="innerTabs">
+      ${tabs.map((t,i)=>`<button class="inner-tab${i===0?' active':''}" onclick="showInnerTab('${t.id}')" id="itab-${t.id}">${t.label}</button>`).join('')}
+    </div>
+    <div id="innerContent"></div>
+  `;
+
+  showInnerTab('dashboard');
+}
+
+function showInnerTab(tabId) {
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
+  const btn = document.getElementById('itab-'+tabId);
+  if(btn) btn.classList.add('active');
+
+  const content = document.getElementById('innerContent');
+  content.innerHTML = '';
+
+  switch(tabId) {
+    case 'dashboard': renderDashboard(content); break;
+    case 'inscription': renderInscription(content, false); break;
+    case 'reinscription': renderInscription(content, true); break;
+    case 'gestion': renderGestion(content); break;
+    case 'notes': renderNotes(content); break;
+    case 'animateurs': renderAnimateurs(content); break;
+  }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(el) {
+  const sec = currentSection;
+  const cats = DB.catechumenes[sec];
+  const info = DB.sections[sec];
+
+  let counts = {};
+  for(let n=1;n<=5;n++) counts[n] = cats.filter(c=>c.annee===n).length;
+  const total = cats.length;
+
+  let statsHTML = '';
+  for(let n=1;n<=5;n++) {
+    statsHTML += `
+      <div class="stat-card">
+        <div class="stat-number">${counts[n]}</div>
+        <div class="stat-label">${DB.niveaux[n-1]}</div>
+        <div class="stat-sub">${counts[n]} catéchumène${counts[n]!==1?'s':''}</div>
+      </div>`;
+  }
+
+  let animHTML = '';
+  for(let n=1;n<=5;n++) {
+    const anims = DB.animateurs[sec][n];
+    if(anims.length===0) continue;
+    animHTML += `
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;">${DB.niveaux[n-1]}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${anims.map(a=>`<span class="animateur-tag">👤 ${a.nom}</span>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="dashboard-header">
+      <div class="dashboard-aumoner">Aumonier : ${DB.aumonier}</div>
+      <div class="dashboard-section-title">${info.icon} Section ${info.label}</div>
+      <div class="dashboard-section-subtitle">Paroisse St Pierre de Niangon Sud à Gauche — Diocèse de Yopougon</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="border-top-color:var(--crimson);">
+        <div class="stat-number">${total}</div>
+        <div class="stat-label">Total</div>
+        <div class="stat-sub">Catéchumènes</div>
+      </div>
+      ${statsHTML}
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 Animateurs par Niveau</div>
+      ${animHTML || '<p style="color:var(--text-light);font-style:italic;">Aucun animateur assigné.</p>'}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Répartition par Niveau</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        ${[1,2,3,4,5].map(n=>{
+          const pct = total ? Math.round(counts[n]/total*100) : 0;
+          return `<div style="flex:1;min-width:120px;">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--navy);">${DB.niveaux[n-1]}</div>
+            <div style="background:#f0eada;border-radius:20px;height:10px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));border-radius:20px;transition:width 1s;"></div>
+            </div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:4px;">${counts[n]} (${pct}%)</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// INSCRIPTION
+// ============================================================
+function renderInscription(el, isReinscription) {
+  const sec = currentSection;
+  const anims = Object.entries(DB.animateurs[sec])
+    .flatMap(([n,arr])=>arr.map(a=>({...a, niveau:n})));
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">${isReinscription ? '🔄 Réinscription' : '📝 Nouvelle Inscription'} — ${DB.sections[sec].label}</div>
+      ${!isReinscription ? '<div class="alert alert-info">Cette fiche concerne les catéchumènes de <strong>1ère Année</strong>.</div>' : '<div class="alert alert-info">Cette fiche concerne les catéchumènes de <strong>2ème, 3ème, 4ème ou 5ème Année</strong>.</div>'}
+
+      <div class="inscription-form">
+        <div class="form-group">
+          <label>Nom de famille *</label>
+          <input type="text" class="form-control" id="inscNom" placeholder="NOM">
+        </div>
+        <div class="form-group">
+          <label>Prénom(s) *</label>
+          <input type="text" class="form-control" id="inscPrenom" placeholder="Prénom">
+        </div>
+        <div class="form-group">
+          <label>Sexe *</label>
+          <select class="form-control" id="inscSexe">
+            <option value="">—</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date de Naissance *</label>
+          <input type="date" class="form-control" id="inscDateNais">
+        </div>
+        ${sec!=='adultes' ? `<div class="form-group">
+          <label>Nom du Parent / Tuteur</label>
+          <input type="text" class="form-control" id="inscParent" placeholder="Parent ou tuteur">
+        </div>` : ''}
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="tel" class="form-control" id="inscTel" placeholder="07XXXXXXXX">
+        </div>
+        ${isReinscription ? `<div class="form-group">
+          <label>Année (réinscription) *</label>
+          <select class="form-control" id="inscAnnee">
+            <option value="2">2ème Année</option>
+            <option value="3">3ème Année</option>
+            <option value="4">4ème Année</option>
+            <option value="5">5ème Année</option>
+          </select>
+        </div>` : '<input type="hidden" id="inscAnnee" value="1">'}
+        <div class="form-group">
+          <label>Animateur(s) assigné(s)</label>
+          <select class="form-control" id="inscAnimateur">
+            <option value="">— Selon le niveau —</option>
+            ${anims.map(a=>`<option value="${a.nom}">${a.nom} (Niv. ${a.niveau})</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date d'inscription</label>
+          <input type="date" class="form-control" id="inscDate" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+      </div>
+
+      <div class="gold-sep"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="saveInscription(${isReinscription})">💾 Enregistrer</button>
+        <button class="btn btn-outline" onclick="clearInscriptionForm()">🗑️ Effacer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Liste — ${isReinscription?'Réinscrits (2e-5e)':'Nouvelles inscriptions (1ère Année)'}</div>
+      <div class="table-responsive">${buildCatTable(sec, isReinscription?[2,3,4,5]:[1])}</div>
+    </div>
+  `;
+}
+
+function saveInscription(isReinscription) {
+  const nom = document.getElementById('inscNom').value.trim().toUpperCase();
+  const prenom = document.getElementById('inscPrenom').value.trim();
+  const sexe = document.getElementById('inscSexe').value;
+  const dateNais = document.getElementById('inscDateNais').value;
+  const annee = parseInt(document.getElementById('inscAnnee').value);
+  const tel = document.getElementById('inscTel').value;
+  const parent = document.getElementById('inscParent')?.value||'N/A';
+  const inscrit = document.getElementById('inscDate').value;
+
+  if(!nom||!prenom||!sexe||!dateNais) { alert('Veuillez remplir les champs obligatoires (*)'); return; }
+
+  const id = currentSection[0]+Date.now();
+  const cat = {id,nom,prenom,annee,sexe,dateNais,parent,tel,inscrit};
+  DB.catechumenes[currentSection].push(cat);
+  persistAll();
+  showSaveIndicator();
+  showAlert('✅ '+prenom+' '+nom+' inscrit(e) avec succès !');
+  clearInscriptionForm();
+  setTimeout(()=>showInnerTab(isReinscription?'reinscription':'inscription'),200);
+}
+
+function clearInscriptionForm() {
+  ['inscNom','inscPrenom','inscDateNais','inscTel','inscParent'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['inscSexe','inscAnimateur'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function buildCatTable(sec, annees) {
+  const cats = DB.catechumenes[sec].filter(c=>annees.includes(c.annee));
+  if(!cats.length) return '<p style="color:var(--text-light);padding:16px;font-style:italic;">Aucun catéchumène enregistré.</p>';
+  return `<table>
+    <tr><th>#</th><th>Nom & Prénom</th><th>Sexe</th><th>Naissance</th><th>Niveau</th><th>Parent/Tuteur</th><th>Téléphone</th><th>Inscrit le</th><th>Actions</th></tr>
+    ${cats.map((c,i)=>`<tr>
+      <td>${i+1}</td>
+      <td><strong>${c.nom}</strong> ${c.prenom}</td>
+      <td>${c.sexe}</td>
+      <td>${c.dateNais||'—'}</td>
+      <td><span class="badge" style="background:#e8f4fd;color:#0a4a8a;">${DB.niveaux[c.annee-1]}</span></td>
+      <td>${c.parent||'—'}</td>
+      <td>${c.tel||'—'}</td>
+      <td>${c.inscrit||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-danger" onclick="deleteCat('${sec}','${c.id}')">🗑️</button>
+      </td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function deleteCat(sec, id) {
+  if(!confirm('Supprimer ce catéchumène ?')) return;
+  DB.catechumenes[sec] = DB.catechumenes[sec].filter(c=>c.id!==id);
+  persistAll();
+  showSaveIndicator();
+  showInnerTab('gestion');
+}
+
+// ============================================================
+// CALENDRIER CATÉCHÈSE
+// ============================================================
+const MOIS_CATECHESE = [
+  {idx:0, nom:'Octobre',   court:'Oct', mois:9},
+  {idx:1, nom:'Novembre',  court:'Nov', mois:10},
+  {idx:2, nom:'Décembre',  court:'Déc', mois:11},
+  {idx:3, nom:'Janvier',   court:'Jan', mois:0},
+  {idx:4, nom:'Février',   court:'Fév', mois:1},
+  {idx:5, nom:'Mars',      court:'Mar', mois:2},
+  {idx:6, nom:'Avril',     court:'Avr', mois:3},
+  {idx:7, nom:'Mai',       court:'Mai', mois:4},
+];
+
+const NB_SEMAINES = 4;
+let presenceMoisActuel = 0;
+let notesMoisActuel = 0;
+
+// ============================================================
+// GESTION / PRÉSENCES
+// ============================================================
+function renderGestion(el) {
+  const sec = currentSection;
+  el.innerHTML = `
+    <div class="export-bar">
+      <label>📤 Exporter :</label>
+      <button class="btn btn-success" onclick="exportPresenceExcel('${sec}')">📊 Présences Annuelles</button>
+      <button class="btn btn-gold" onclick="exportBlankExcel('${sec}')">📋 Fiche Vierge</button>
+      <label style="margin-left:10px;">📥 Importer :</label>
+      <input type="file" id="fileUpload" accept=".xlsx,.xls" style="display:none;" onchange="importExcel(event,'${sec}')">
+      <button class="btn btn-outline" onclick="document.getElementById('fileUpload').click()">📂 Charger Excel</button>
+    </div>
+    <div class="legend" style="margin-bottom:12px;">
+      <div class="legend-item"><span class="badge badge-P">P</span> Présent</div>
+      <div class="legend-item"><span class="badge badge-A">A</span> Absent</div>
+      <div class="legend-item"><span class="badge badge-E">E</span> Excusé</div>
+    </div>
+    <div id="presenceBody"></div>
+  `;
+  renderPresenceMois(sec, presenceMoisActuel);
+}
+
+function renderPresenceMois(sec, moisIdx) {
+  presenceMoisActuel = moisIdx;
+  const mois = MOIS_CATECHESE[moisIdx];
+  const isAnimateur = currentUser.titre === 'animateur';
+  const niveaux = isAnimateur ? [parseInt(currentUser.niveau)] : [1,2,3,4,5];
+
+  let navHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="renderPresenceMois('${sec}',${moisIdx>0?moisIdx-1:0})" ${moisIdx===0?'disabled':''}>◀ Précédent</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center;">
+        ${MOIS_CATECHESE.map((m,i)=>`
+          <button onclick="renderPresenceMois('${sec}',${i})"
+            style="padding:7px 13px;border-radius:20px;border:2px solid ${i===moisIdx?'var(--navy)':'#ddd'};
+            background:${i===moisIdx?'var(--navy)':'white'};color:${i===moisIdx?'white':'var(--text-mid)'};
+            font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+            ${m.court}
+          </button>`).join('')}
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="renderPresenceMois('${sec}',${moisIdx<7?moisIdx+1:7})" ${moisIdx===7?'disabled':''}>Suivant ▶</button>
+    </div>
+  `;
+
+  let tablesHTML = '';
+  for (const niv of niveaux) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === niv);
+    if (!nivCats.length) continue;
+    const anims = DB.animateurs[sec][niv];
+
+    let totalP=0, totalA=0, totalE=0, totalCells=0;
+    nivCats.forEach(cat => {
+      for(let s=0;s<NB_SEMAINES;s++) {
+        ['cours','messe'].forEach(type => {
+          const v = getPresence(sec, cat.id, type, moisIdx, s);
+          if(v==='P') totalP++;
+          else if(v==='A') totalA++;
+          else if(v==='E') totalE++;
+          if(v) totalCells++;
+        });
+      }
+    });
+
+    tablesHTML += `
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">
+          📚 ${DB.niveaux[niv-1]} — ${mois.nom}
+          <span style="font-size:12px;font-weight:400;color:var(--text-light);margin-left:8px;">${anims.map(a=>a.nom).join(' · ')||'Aucun animateur'}</span>
+        </div>
+
+        ${totalCells>0?`<div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+          <span style="font-size:13px;"><span class="badge badge-P">P</span> <strong>${totalP}</strong></span>
+          <span style="font-size:13px;"><span class="badge badge-A">A</span> <strong>${totalA}</strong></span>
+          <span style="font-size:13px;"><span class="badge badge-E">E</span> <strong>${totalE}</strong></span>
+          <span style="font-size:12px;color:var(--text-light);">sur ${totalCells} saisies</span>
+        </div>`:''}
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" style="min-width:150px;vertical-align:middle;">Catéchumène</th>
+                ${[1,2,3,4].map(s=>`<th colspan="2" style="text-align:center;background:linear-gradient(135deg,#1a2d5a,#0D1B3E);">Semaine ${s}</th>`).join('')}
+                <th rowspan="2" style="background:linear-gradient(135deg,#7b3800,#b8621e);vertical-align:middle;text-align:center;">Bilan</th>
+              </tr>
+              <tr>
+                ${[1,2,3,4].flatMap(()=>[
+                  `<th class="cours-th" style="font-size:11px;text-align:center;">📖 Cours</th>`,
+                  `<th class="messe-th" style="font-size:11px;text-align:center;">⛪ Messe</th>`
+                ]).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${nivCats.map(cat => {
+                let pCat=0, aCat=0, eCat=0;
+                const cells = [1,2,3,4].flatMap((s,si) =>
+                  ['cours','messe'].map(type => {
+                    const v = getPresence(sec, cat.id, type, moisIdx, si);
+                    if(v==='P') pCat++;
+                    else if(v==='A') aCat++;
+                    else if(v==='E') eCat++;
+                    const borderColor = type==='cours'?'#86efac':'#fca5a5';
+                    return `<td style="text-align:center;padding:6px 4px;">
+                      <select class="presence-select" style="border-color:${borderColor};width:54px;"
+                        onchange="savePresence('${sec}','${cat.id}','${type}',${moisIdx},${si},this.value)">
+                        <option value="" ${!v?'selected':''}>—</option>
+                        <option value="P" ${v==='P'?'selected':''}>P</option>
+                        <option value="A" ${v==='A'?'selected':''}>A</option>
+                        <option value="E" ${v==='E'?'selected':''}>E</option>
+                      </select>
+                    </td>`;
+                  })
+                ).join('');
+                const total = pCat+aCat+eCat;
+                const pct = total ? Math.round(pCat/total*100) : null;
+                const bilanColor = pct===null?'var(--text-light)':pct>=75?'var(--green)':pct>=50?'#e67e22':'var(--crimson)';
+                return `<tr>
+                  <td><strong>${cat.nom}</strong> ${cat.prenom}</td>
+                  ${cells}
+                  <td style="text-align:center;font-size:12px;font-weight:700;color:${bilanColor};">
+                    ${pct!==null?`${pCat}P / ${aCat}A / ${eCat}E<br><small>${pct}%</small>`:'—'}
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('presenceBody').innerHTML = navHTML + tablesHTML;
+}
+
+function getPresence(sec, catId, type, moisIdx, semaine) {
+  return DB.presences[`${sec}-${catId}-${type}-m${moisIdx}-s${semaine}`] || '';
+}
+
+function savePresence(sec, catId, type, moisIdx, semaine, val) {
+  DB.presences[`${sec}-${catId}-${type}-m${moisIdx}-s${semaine}`] = val;
+  savePresencesDebounced();
+}
+
+function getNote(sec, catId, niv, moisIdx, epreuveIdx) {
+  return DB.notes[`${sec}-${catId}-${niv}-m${moisIdx}-e${epreuveIdx}`] || '';
+}
+
+function saveNote(sec, catId, niv, moisIdx, epreuveIdx, val) {
+  DB.notes[`${sec}-${catId}-${niv}-m${moisIdx}-e${epreuveIdx}`] = val;
+  saveNotesDebounced();
+}
+
+// ============================================================
+// NOTES PAR MOIS
+// ============================================================
+const EPREUVES_PAR_MOIS = {
+  0: ['Interro 1'],
+  1: ['Interro 2','Devoir 1'],
+  2: ['Devoir 2'],
+  3: ['Interro 3'],
+  4: ['Devoir 3'],
+  5: ['Interro 4','Devoir 4'],
+  6: ['Révision'],
+  7: ['Examen Final'],
+};
+
+function renderNotes(el) {
+  const sec = currentSection;
+  el.innerHTML = `
+    <div class="export-bar">
+      <label>📤 Exporter :</label>
+      <button class="btn btn-success" onclick="exportNotesExcel('${sec}')">📊 Notes Annuelles</button>
+      <button class="btn btn-gold" onclick="exportBulletinExcel('${sec}')">📋 Bulletins</button>
+    </div>
+    <div id="notesBody"></div>
+  `;
+  renderNotesMois(sec, notesMoisActuel);
+}
+
+function renderNotesMois(sec, moisIdx) {
+  notesMoisActuel = moisIdx;
+  const mois = MOIS_CATECHESE[moisIdx];
+  const isAnimateur = currentUser.titre === 'animateur';
+  const niveaux = isAnimateur ? [parseInt(currentUser.niveau)] : [1,2,3,4,5];
+  const epreuvesMois = EPREUVES_PAR_MOIS[moisIdx];
+
+  let navHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="renderNotesMois('${sec}',${moisIdx>0?moisIdx-1:0})" ${moisIdx===0?'disabled':''}>◀ Précédent</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center;">
+        ${MOIS_CATECHESE.map((m,i)=>`
+          <button onclick="renderNotesMois('${sec}',${i})"
+            style="padding:7px 13px;border-radius:20px;border:2px solid ${i===moisIdx?'#6c3483':'#ddd'};
+            background:${i===moisIdx?'#6c3483':'white'};color:${i===moisIdx?'white':'var(--text-mid)'};
+            font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+            ${m.court}
+          </button>`).join('')}
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="renderNotesMois('${sec}',${moisIdx<7?moisIdx+1:7})" ${moisIdx===7?'disabled':''}>Suivant ▶</button>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:16px;">
+      📅 <strong>${mois.nom}</strong> — Épreuves prévues : <strong>${epreuvesMois.join(', ')}</strong>
+      &nbsp;&nbsp;<button class="btn btn-sm btn-outline" onclick="configurerEpreuves('${sec}',${moisIdx})">⚙️ Modifier</button>
+    </div>
+  `;
+
+  let tablesHTML = '';
+  for (const niv of niveaux) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === niv);
+    if (!nivCats.length) continue;
+
+    tablesHTML += `
+      <div class="card">
+        <div class="card-title">🎓 ${DB.niveaux[niv-1]} — Notes de ${mois.nom}</div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="min-width:160px;">Catéchumène</th>
+                ${epreuvesMois.map(e=>`<th class="note-th">${e}<br><small>/20</small></th>`).join('')}
+                <th style="background:linear-gradient(135deg,#c0392b,#e74c3c);">Moy. Mois</th>
+                <th style="background:linear-gradient(135deg,#7b3800,#b8621e);">Moy. Générale</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${nivCats.map(cat => {
+                const notesMois = epreuvesMois.map((e,i) => getNote(sec, cat.id, niv, moisIdx, i));
+                const filledMois = notesMois.filter(n=>n!=='').map(n=>parseFloat(n)||0);
+                const avgMois = filledMois.length ? (filledMois.reduce((a,b)=>a+b,0)/filledMois.length).toFixed(2) : '—';
+
+                let allNotes = [];
+                MOIS_CATECHESE.forEach((_,mi) => {
+                  const ep = EPREUVES_PAR_MOIS[mi];
+                  ep.forEach((_,ei) => {
+                    const n = getNote(sec, cat.id, niv, mi, ei);
+                    if(n!=='') allNotes.push(parseFloat(n)||0);
+                  });
+                });
+                const avgGen = allNotes.length ? (allNotes.reduce((a,b)=>a+b,0)/allNotes.length).toFixed(2) : '—';
+
+                const clsMois = avgMois==='—'?'':parseFloat(avgMois)>=14?'moyenne-good':parseFloat(avgMois)>=10?'moyenne-mid':'moyenne-bad';
+                const clsGen  = avgGen==='—'?'':parseFloat(avgGen)>=14?'moyenne-good':parseFloat(avgGen)>=10?'moyenne-mid':'moyenne-bad';
+
+                return `<tr>
+                  <td><strong>${cat.nom}</strong> ${cat.prenom}</td>
+                  ${epreuvesMois.map((e,i)=>`
+                    <td style="text-align:center;">
+                      <input class="note-input" type="number" min="0" max="20" step="0.5"
+                        value="${getNote(sec,cat.id,niv,moisIdx,i)}"
+                        onchange="saveNote('${sec}','${cat.id}',${niv},${moisIdx},${i},this.value)"
+                        onblur="refreshNotesRow('${sec}',${niv},'${cat.id}',${moisIdx})">
+                    </td>`).join('')}
+                  <td style="text-align:center;"><span id="avgm-${cat.id}" class="${clsMois}">${avgMois}</span></td>
+                  <td style="text-align:center;"><span id="avgg-${cat.id}" class="${clsGen}">${avgGen}</span></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('notesBody').innerHTML = navHTML + tablesHTML;
+}
+
+function configurerEpreuves(sec, moisIdx) {
+  const mois = MOIS_CATECHESE[moisIdx];
+  const actuel = EPREUVES_PAR_MOIS[moisIdx].join(', ');
+  openModal(`⚙️ Épreuves de ${mois.nom}`,`
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:12px;">Saisissez les noms des épreuves séparés par des virgules.</p>
+    <div class="form-group">
+      <label>Épreuves</label>
+      <input type="text" class="form-control" id="epInput" value="${actuel}" placeholder="Ex: Interro 1, Devoir 1">
+    </div>
+  `,[
+    {label:'Annuler', cls:'btn-outline', fn:'closeModal()'},
+    {label:'Enregistrer', cls:'btn-primary', fn:`saveEpreuves('${sec}',${moisIdx})`}
+  ]);
+}
+
+function saveEpreuves(sec, moisIdx) {
+  const val = document.getElementById('epInput').value;
+  const liste = val.split(',').map(s=>s.trim()).filter(s=>s);
+  if(!liste.length) return;
+  EPREUVES_PAR_MOIS[moisIdx] = liste;
+  closeModal();
+  renderNotesMois(sec, moisIdx);
+}
+
+function refreshNotesRow(sec, niv, catId, moisIdx) {
+  const ep = EPREUVES_PAR_MOIS[moisIdx];
+  const notesMois = ep.map((_,i) => getNote(sec, catId, niv, moisIdx, i));
+  const filledMois = notesMois.filter(n=>n!=='').map(n=>parseFloat(n)||0);
+  const avgMois = filledMois.length ? (filledMois.reduce((a,b)=>a+b,0)/filledMois.length).toFixed(2) : '—';
+
+  let allNotes = [];
+  MOIS_CATECHESE.forEach((_,mi) => {
+    EPREUVES_PAR_MOIS[mi].forEach((_,ei) => {
+      const n = getNote(sec, catId, niv, mi, ei);
+      if(n!=='') allNotes.push(parseFloat(n)||0);
+    });
+  });
+  const avgGen = allNotes.length ? (allNotes.reduce((a,b)=>a+b,0)/allNotes.length).toFixed(2) : '—';
+
+  const clsMois = avgMois==='—'?'':parseFloat(avgMois)>=14?'moyenne-good':parseFloat(avgMois)>=10?'moyenne-mid':'moyenne-bad';
+  const clsGen  = avgGen==='—'?'':parseFloat(avgGen)>=14?'moyenne-good':parseFloat(avgGen)>=10?'moyenne-mid':'moyenne-bad';
+
+  const em = document.getElementById('avgm-'+catId);
+  const eg = document.getElementById('avgg-'+catId);
+  if(em) { em.className=clsMois; em.textContent=avgMois; }
+  if(eg) { eg.className=clsGen;  eg.textContent=avgGen; }
+}
+
+// ============================================================
+// ANIMATEURS
+// ============================================================
+function renderAnimateurs(el) {
+  const sec = currentSection;
+  const isPrivileged = currentUser.titre!=='animateur'||currentUser.titre==='admin';
+
+  let html = `<div class="card">
+    <div class="card-title">👥 Animateurs & Niveaux — ${DB.sections[sec].label}</div>
+  `;
+
+  for(let n=1;n<=5;n++) {
+    const anims = DB.animateurs[sec][n];
+    html += `
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h3 style="font-family:'Cinzel',serif;font-size:15px;color:var(--navy);">📌 ${DB.niveaux[n-1]}</h3>
+          ${isPrivileged ? `<button class="btn btn-sm btn-primary" onclick="addAnimateurModal('${sec}',${n})">+ Ajouter</button>` : ''}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${anims.length ? anims.map((a,i)=>`
+            <div class="animateur-tag">
+              👤 ${a.nom}
+              ${isPrivileged?`<span onclick="removeAnimateur('${sec}',${n},${i})" style="cursor:pointer;opacity:0.7;margin-left:4px;">✕</span>`:''}
+            </div>`).join('') : '<span style="color:var(--text-light);font-style:italic;font-size:13px;">Aucun animateur assigné</span>'}
+        </div>
+      </div>
+    `;
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function addAnimateurModal(sec, niv) {
+  openModal(`Ajouter un Animateur — ${DB.niveaux[niv-1]}`,`
+    <div class="form-group">
+      <label>Nom complet de l'animateur</label>
+      <input type="text" class="form-control" id="newAnimNom" placeholder="Prénom NOM">
+    </div>
+  `, [
+    {label:'Annuler', cls:'btn-outline', fn:'closeModal()'},
+    {label:'Ajouter', cls:'btn-primary', fn:`doAddAnimateur('${sec}',${niv})`}
+  ]);
+}
+
+function doAddAnimateur(sec, niv) {
+  const nom = document.getElementById('newAnimNom').value.trim();
+  if(!nom) return;
+  if(DB.animateurs[sec][niv].length>=5) { alert('Maximum 5 animateurs par niveau'); return; }
+  DB.animateurs[sec][niv].push({nom});
+  persistAll();
+  showSaveIndicator();
+  closeModal();
+  showInnerTab('animateurs');
+}
+
+function removeAnimateur(sec, niv, idx) {
+  if(!confirm('Retirer cet animateur ?')) return;
+  DB.animateurs[sec][niv].splice(idx,1);
+  persistAll();
+  showSaveIndicator();
+  showInnerTab('animateurs');
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function renderAdmin(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">🔐 Administration — Gestion des Accès</div>
+      <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showAddUserModal()">+ Créer un accès</button>
+      </div>
+      <div class="admin-users-grid" id="usersList">
+        ${renderUsersList()}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Informations de la Paroisse</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom de l'Aumonier</label>
+          <input type="text" class="form-control" id="aumNom" value="${DB.aumonier}">
+        </div>
+      </div>
+      <div class="gold-sep"></div>
+      <button class="btn btn-gold" onclick="DB.aumonier=document.getElementById('aumNom').value;persistAll();showAlert('✅ Informations mises à jour !')">💾 Enregistrer</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">☁️ Synchronisation Firebase</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:16px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:6px;"></span>
+        <strong>Synchronisation en ligne active</strong> — Les données sont enregistrées dans Firebase Realtime Database et conservées en cache sur cet appareil.
+        <br><span style="color:var(--text-light);font-style:italic;margin-top:4px;display:block;">En cas de coupure réseau, le cache local prend le relais temporairement.</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-danger" onclick="clearStorage()">⚠️ Réinitialiser toutes les données</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔑 Compte Administrateur par Défaut</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:2;">
+        <p>Le compte administrateur par défaut est :</p>
+        <p>Login : <code style="background:#f0eada;padding:2px 8px;border-radius:4px;">admin</code> &nbsp; Mot de passe : <code style="background:#f0eada;padding:2px 8px;border-radius:4px;">Admin@2024</code></p>
+        <p style="color:var(--crimson);font-weight:700;margin-top:8px;">⚠️ Créez un nouveau compte admin et supprimez celui par défaut !</p>
+      </div>
+    </div>
+  `;
+}
+
+function renderUsersList() {
+  return DB.users.map(u=>`
+    <div class="user-card">
+      <div class="user-card-info">
+        <h4>${u.login}</h4>
+        <p>${u.titre} | ${u.section} ${u.niveau?'— Niv.'+u.niveau:''}</p>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function showAddUserModal() {
+  openModal('Créer un Accès Utilisateur',`
+    <div class="form-group"><label>Login *</label><input type="text" class="form-control" id="nuLogin" placeholder="prenom.nom"></div>
+    <div class="form-group"><label>Mot de passe *</label><input type="password" class="form-control" id="nuPass"></div>
+    <div class="form-group"><label>Section *</label>
+      <select class="form-control" id="nuSection">
+        <option value="enfants">Enfants</option><option value="jeunes">Jeunes</option><option value="adultes">Adultes</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Rôle *</label>
+      <select class="form-control" id="nuTitre">
+        <option value="president">Président(e)</option><option value="bureau">Membre du Bureau</option><option value="animateur">Animateur</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Niveau (si Animateur)</label>
+      <select class="form-control" id="nuNiveau">
+        <option value="">Tous</option>
+        ${[1,2,3,4,5].map(n=>`<option value="${n}">${DB.niveaux[n-1]}</option>`).join('')}
+      </select>
+    </div>
+  `,[
+    {label:'Annuler',cls:'btn-outline',fn:'closeModal()'},
+    {label:'Créer',cls:'btn-primary',fn:'doCreateUser()'}
+  ]);
+}
+
+async function doCreateUser() {
+  const login   = document.getElementById('nuLogin').value.trim();
+  const pass    = document.getElementById('nuPass').value;
+  const section = document.getElementById('nuSection').value;
+  const titre   = document.getElementById('nuTitre').value;
+  const niveau  = document.getElementById('nuNiveau').value;
+  if(!login||!pass) { alert('Login et mot de passe obligatoires'); return; }
+  const passHash = await hashPass(pass);
+  const id = 'u'+Date.now();
+  const user = {id, login, pass: passHash, section, titre, niveau};
+  DB.users.push(user);
+  persistAll();
+  showSaveIndicator();
+  closeModal();
+  renderAdmin(document.getElementById('appContent'));
+}
+
+function deleteUser(id) {
+  if(!confirm('Supprimer cet accès ?')) return;
+  DB.users = DB.users.filter(u=>u.id!==id);
+  persistAll();
+  showSaveIndicator();
+  renderAdmin(document.getElementById('appContent'));
+}
+
+// ============================================================
+// EXCEL EXPORT
+// ============================================================
+function exportPresenceExcel(sec) {
+  const wb = XLSX.utils.book_new();
+  const cover = XLSX.utils.aoa_to_sheet([
+    ['CATÉCHUMÉNAT — PAROISSE ST PIERRE DE NIANGON SUD'],
+    ['Diocèse de Yopougon'],
+    [`Aumonier : ${DB.aumonier}`],
+    [`Section : ${DB.sections[sec].label}`],
+    [`Exporté le : ${new Date().toLocaleDateString('fr-FR')}`],
+    [`Année catéchétique : Octobre — Mai`],
+    [],
+    ['Légende : P = Présent | A = Absent | E = Excusé'],
+    ['Chaque mois comporte 4 semaines × Cours + Messe'],
+  ]);
+  cover['!cols'] = [{wch:70}];
+  XLSX.utils.book_append_sheet(wb, cover, 'Couverture');
+
+  for (let n = 1; n <= 5; n++) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === n);
+    if (!nivCats.length) continue;
+
+    const row1 = ['N°','Nom','Prénom','Sexe'];
+    const row2 = ['','','',''];
+
+    MOIS_CATECHESE.forEach(m => {
+      for(let s=0;s<NB_SEMAINES;s++) {
+        row1.push(m.nom, m.nom);
+        row2.push(`S${s+1} Cours`, `S${s+1} Messe`);
+      }
+    });
+    row1.push('Total P','Total A','Total E');
+    row2.push('','','');
+
+    const rows = [
+      [`PRÉSENCES — ${DB.sections[sec].label} — ${DB.niveaux[n-1]}`],
+      [`Aumonier : ${DB.aumonier}`],
+      ['Légende : P = Présent | A = Absent | E = Excusé'],
+      [],
+      row1, row2,
+      ...nivCats.map((cat,i) => {
+        let totalP=0,totalA=0,totalE=0;
+        const pres = [];
+        MOIS_CATECHESE.forEach((_,mi) => {
+          for(let s=0;s<NB_SEMAINES;s++) {
+            ['cours','messe'].forEach(type => {
+              const v = getPresence(sec,cat.id,type,mi,s)||'';
+              pres.push(v);
+              if(v==='P') totalP++;
+              else if(v==='A') totalA++;
+              else if(v==='E') totalE++;
+            });
+          }
+        });
+        return [i+1, cat.nom, cat.prenom, cat.sexe, ...pres, totalP, totalA, totalE];
+      })
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const colCount = 4 + NB_SEMAINES*2*8 + 3;
+    ws['!cols'] = [{wch:4},{wch:18},{wch:18},{wch:5},...Array(colCount-4).fill({wch:9})];
+    XLSX.utils.book_append_sheet(wb, ws, DB.niveaux[n-1].replace('ère','ere').replace('ème','eme'));
+  }
+
+  XLSX.writeFile(wb, `Presences_${DB.sections[sec].label}_${new Date().getFullYear()}.xlsx`);
+}
+
+function exportBlankExcel(sec) {
+  const wb = XLSX.utils.book_new();
+
+  for (let n = 1; n <= 5; n++) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === n);
+    if (!nivCats.length) continue;
+
+    const row1 = ['N°','Nom','Prénom','Sexe'];
+    const row2 = ['','','',''];
+    MOIS_CATECHESE.forEach(m => {
+      for(let s=0;s<NB_SEMAINES;s++) {
+        row1.push(m.nom, m.nom);
+        row2.push(`S${s+1} Cours`, `S${s+1} Messe`);
+      }
+    });
+    row1.push('Total P','Total A','Total E');
+    row2.push('','','');
+
+    const rows = [
+      [`FICHE VIERGE — ${DB.sections[sec].label} — ${DB.niveaux[n-1]}`],
+      [`Aumonier : ${DB.aumonier}`],
+      ['Légende : P = Présent | A = Absent | E = Excusé'],
+      [],
+      row1, row2,
+      ...nivCats.map((cat,i) => [i+1, cat.nom, cat.prenom, cat.sexe, ...Array(NB_SEMAINES*2*8+3).fill('')])
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const colCount = 4 + NB_SEMAINES*2*8 + 3;
+    ws['!cols'] = [{wch:4},{wch:18},{wch:18},{wch:5},...Array(colCount-4).fill({wch:9})];
+    XLSX.utils.book_append_sheet(wb, ws, DB.niveaux[n-1].replace('ère','ere').replace('ème','eme'));
+  }
+
+  XLSX.writeFile(wb, `FicheVierge_${DB.sections[sec].label}.xlsx`);
+}
+
+function exportNotesExcel(sec) {
+  const wb = XLSX.utils.book_new();
+  const cover = XLSX.utils.aoa_to_sheet([
+    ['NOTES — CATÉCHUMÉNAT ST PIERRE DE NIANGON SUD'],
+    [`Section : ${DB.sections[sec].label}`],
+    [`Aumonier : ${DB.aumonier}`],
+    [`Exporté le : ${new Date().toLocaleDateString('fr-FR')}`],
+  ]);
+  cover['!cols'] = [{wch:60}];
+  XLSX.utils.book_append_sheet(wb, cover, 'Couverture');
+
+  for (let n = 1; n <= 5; n++) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === n);
+    if (!nivCats.length) continue;
+
+    const headerMois = ['N°','Nom','Prénom'];
+    const headerEp   = ['','',''];
+    MOIS_CATECHESE.forEach(m => {
+      const ep = EPREUVES_PAR_MOIS[m.idx];
+      ep.forEach(e => { headerMois.push(m.nom); headerEp.push(e); });
+    });
+    headerMois.push('Moy. Générale');
+    headerEp.push('/20');
+
+    const rows = [
+      [`NOTES — ${DB.sections[sec].label} — ${DB.niveaux[n-1]}`],
+      [`Aumonier : ${DB.aumonier}`],
+      [],
+      headerMois, headerEp,
+    ];
+
+    nivCats.forEach((cat,i) => {
+      const row = [i+1, cat.nom, cat.prenom];
+      let allNotes = [];
+      MOIS_CATECHESE.forEach((_,mi) => {
+        const ep = EPREUVES_PAR_MOIS[mi];
+        ep.forEach((_,ei) => {
+          const n2 = getNote(sec, cat.id, n, mi, ei);
+          row.push(n2!==''?parseFloat(n2):'');
+          if(n2!=='') allNotes.push(parseFloat(n2)||0);
+        });
+      });
+      const avg = allNotes.length ? (allNotes.reduce((a,b)=>a+b,0)/allNotes.length).toFixed(2) : '';
+      row.push(avg);
+      rows.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:4},{wch:18},{wch:18},...Array(100).fill({wch:11})];
+    XLSX.utils.book_append_sheet(wb, ws, DB.niveaux[n-1].replace('ère','ere').replace('ème','eme'));
+  }
+
+  XLSX.writeFile(wb, `Notes_${DB.sections[sec].label}_${new Date().getFullYear()}.xlsx`);
+}
+
+function exportBulletinExcel(sec) {
+  const wb = XLSX.utils.book_new();
+
+  for (let n = 1; n <= 5; n++) {
+    const nivCats = DB.catechumenes[sec].filter(c => c.annee === n);
+    if (!nivCats.length) continue;
+
+    const rows = [
+      [`BULLETINS DE NOTES — ${DB.sections[sec].label} — ${DB.niveaux[n-1]}`],
+      [`Aumonier : ${DB.aumonier}`],
+      [],
+    ];
+
+    nivCats.forEach((cat, i) => {
+      rows.push([`Catéchumène : ${cat.nom} ${cat.prenom}`, '', `Sexe : ${cat.sexe}`, '', `Inscrit le : ${cat.inscrit||'—'}`]);
+      rows.push(['Mois','Épreuve','Note /20','']);
+      let allNotes = [];
+      MOIS_CATECHESE.forEach((m, mi) => {
+        const ep = EPREUVES_PAR_MOIS[mi];
+        ep.forEach((e, ei) => {
+          const note = getNote(sec, cat.id, n, mi, ei);
+          rows.push([m.nom, e, note!==''?parseFloat(note):'', '']);
+          if(note!=='') allNotes.push(parseFloat(note)||0);
+        });
+        const notesMois = ep.map((_,ei)=>getNote(sec,cat.id,n,mi,ei)).filter(x=>x!=='').map(x=>parseFloat(x));
+        const avgM = notesMois.length ? (notesMois.reduce((a,b)=>a+b,0)/notesMois.length).toFixed(2) : '—';
+        rows.push(['', `→ Moyenne ${m.nom}`, avgM, '']);
+      });
+      const avgGen = allNotes.length ? (allNotes.reduce((a,b)=>a+b,0)/allNotes.length).toFixed(2) : '—';
+      rows.push(['', '⭐ MOYENNE GÉNÉRALE', avgGen, '']);
+      rows.push([]);
+      if (i < nivCats.length-1) rows.push(['---','---','---','---']);
+      rows.push([]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:16},{wch:18},{wch:12},{wch:10}];
+    XLSX.utils.book_append_sheet(wb, ws, DB.niveaux[n-1].replace('ère','ere').replace('ème','eme'));
+  }
+
+  XLSX.writeFile(wb, `Bulletins_${DB.sections[sec].label}_${new Date().getFullYear()}.xlsx`);
+}
+
+function importExcel(event, sec) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, {type:'binary'});
+      let imported = 0;
+      wb.SheetNames.filter(s=>s!=='Couverture').forEach(sheetName => {
+        const ws = wb.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(ws, {header:1});
+        let headerRow = -1;
+        data.forEach((row,ri) => { if(row[0]==='N°'||row[1]==='Nom') headerRow=ri; });
+        if(headerRow<0) return;
+        const dataRows = data.slice(headerRow+2);
+        dataRows.forEach(row => {
+          if(!row[1]) return;
+          const catNom = String(row[1]||'').trim().toUpperCase();
+          const catPrenom = String(row[2]||'').trim();
+          const cat = DB.catechumenes[sec].find(c=>c.nom===catNom && c.prenom===catPrenom);
+          if(!cat) return;
+          let col = 4;
+          MOIS_CATECHESE.forEach((_,mi) => {
+            for(let s=0;s<NB_SEMAINES;s++) {
+              const c = row[col]||''; const m = row[col+1]||'';
+              if(c) savePresence(sec,cat.id,'cours',mi,s,c.toString().toUpperCase());
+              if(m) savePresence(sec,cat.id,'messe',mi,s,m.toString().toUpperCase());
+              col+=2;
+            }
+          });
+          imported++;
+        });
+      });
+      showAlert(`✅ Importation réussie : ${imported} catéchumène(s) mis à jour !`);
+      persistAll();
+      showSaveIndicator();
+      showInnerTab('gestion');
+    } catch(err) {
+      alert('Erreur lors de la lecture du fichier : '+err.message);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(title, body, actions=[]) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalActions').innerHTML = actions.map(a=>
+    `<button class="btn ${a.cls}" onclick="${a.fn}">${a.label}</button>`
+  ).join('');
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+document.getElementById('modalOverlay').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+// ============================================================
+// ALERT
+// ============================================================
+function showAlert(msg) {
+  const a = document.createElement('div');
+  a.className = 'alert alert-success';
+  a.style.cssText = 'position:fixed;top:80px;right:24px;z-index:9999;max-width:320px;animation:fadeSlideIn 0.3s;box-shadow:0 4px 20px rgba(0,0,0,0.2)';
+  a.innerHTML = msg;
+  document.body.appendChild(a);
+  setTimeout(()=>a.remove(),3500);
+}
+
+// Enter key login
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ============================================================
+// DÉMARRAGE
+// ============================================================
+initFromFirebase();
+
+// Expose fonctions globales
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.showSection = showSection;
+window.showInnerTab = showInnerTab;
+window.saveInscription = saveInscription;
+window.clearInscriptionForm = clearInscriptionForm;
+window.deleteCat = deleteCat;
+window.renderPresenceMois = renderPresenceMois;
+window.savePresence = savePresence;
+window.renderNotesMois = renderNotesMois;
+window.saveNote = saveNote;
+window.refreshNotesRow = refreshNotesRow;
+window.configurerEpreuves = configurerEpreuves;
+window.saveEpreuves = saveEpreuves;
+window.addAnimateurModal = addAnimateurModal;
+window.doAddAnimateur = doAddAnimateur;
+window.removeAnimateur = removeAnimateur;
+window.showAddUserModal = showAddUserModal;
+window.doCreateUser = doCreateUser;
+window.deleteUser = deleteUser;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.exportPresenceExcel = exportPresenceExcel;
+window.exportBlankExcel = exportBlankExcel;
+window.exportNotesExcel = exportNotesExcel;
+window.exportBulletinExcel = exportBulletinExcel;
+window.importExcel = importExcel;
+window.loadAllFromFirebase = loadAllFromFirebase;
+window.saveConfig = saveConfig;
+window.clearStorage = clearStorage;
+window.persistAll = persistAll;
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
